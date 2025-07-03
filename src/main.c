@@ -6,6 +6,11 @@
 
 char *curr_dir;
 
+void sh_ex()
+{
+    exit(EXIT_SUCCESS);
+}
+
 void sh_cd(char **us_direc_inp)
 {
     // remove surrounding quotes
@@ -65,7 +70,7 @@ char parse(char us_inp[64])
             if (strcmp(parsed_str[j], builtin[k]) == 0) // returns 0 if equal
             {
                 printf("Builtin found: %s\n", builtin[k]);
-                void (*func_ptr[])(char **) = {sh_cd};
+                void (*func_ptr[])(char **) = {sh_cd, sh_ex};
                 func_ptr[k](parsed_str);
                 command_found = 1;
             }
