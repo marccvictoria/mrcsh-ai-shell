@@ -6,6 +6,30 @@
 
 char *curr_dir;
 
+void sh_echo(char **us_direc_inp)
+{
+    char *arg = us_direc_inp[1];
+
+    // Check if argument starts with '$'
+    if (arg[0] == '$')
+    {
+        const char *env_name = arg + 1; // skip '$'
+        char *value = getenv(env_name);
+        if (value)
+            printf("%s\n", value);
+        else
+            printf("\n"); // or print a message like "undefined variable"
+    }
+    else
+    {
+        for (int i = 0; i < sizeof(arg) / sizeof(arg[0]); i++)
+        {
+            printf("%s", us_direc_inp[i]);
+        }
+        printf("\n");
+    }
+}
+
 void sh_ex()
 {
     exit(EXIT_SUCCESS);
@@ -57,7 +81,7 @@ char parse(char us_inp[64])
     }
     // after the while loop termindated, i value is updated
 
-    char *builtin[] = {"cd", "exit", "help", "set", "unset"};
+    char *builtin[] = {"cd", "exit", "echo", "help", "set", "unset"};
     char *external[] = {};
     int size_builtin = sizeof(builtin) / sizeof(builtin[0]);
     int command_found = 0;
@@ -67,10 +91,9 @@ char parse(char us_inp[64])
         // print the parsed tokens
         for (int j = 0; j < i; j++)
         {
-            if (strcmp(parsed_str[j], builtin[k]) == 0) // returns 0 if equal
+            if (strcmp(parsed_str[j], builtin[k]) == 0) // find if command exits in builtin[], returns 0 if equal
             {
-                printf("Builtin found: %s\n", builtin[k]);
-                void (*func_ptr[])(char **) = {sh_cd, sh_ex};
+                void (*func_ptr[])(char **) = {sh_cd, sh_ex, sh_echo};
                 func_ptr[k](parsed_str);
                 command_found = 1;
             }
