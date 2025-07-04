@@ -6,6 +6,18 @@
 
 char *curr_dir;
 
+void sh_clear()
+{
+    system("clear");
+}
+
+void sh_pwd()
+{
+    char cwd[BUFSIZ];
+    getcwd(cwd, sizeof(cwd));
+    printf("%s\n", cwd);
+}
+
 void sh_echo(char **us_direc_inp)
 {
     char *arg = us_direc_inp[1];
@@ -92,7 +104,7 @@ char parse(char us_inp[BUFSIZ])
     }
     // after the while loop termindated, i value is updated
 
-    char *builtin[] = {"cd", "exit", "echo", "help", "set", "unset"}; // builtin array of each element in it is a pointer to char
+    char *builtin[] = {"cd", "exit", "echo", "pwd", "clear"}; // builtin array of each element in it is a pointer to char
     // Each element of builtin[] is a char * — a pointer to the first character of a string.
     char *external[] = {};
     int size_builtin = sizeof(builtin) / sizeof(builtin[0]);
@@ -112,7 +124,7 @@ char parse(char us_inp[BUFSIZ])
                 - func_ptr is an array of pointers to functions, where each function takes a char **
                 as an argument and returns void.
                 */
-                void (*func_ptr[])(char **) = {sh_cd, sh_ex, sh_echo};
+                void (*func_ptr[])(char **) = {sh_cd, sh_ex, sh_echo, sh_pwd, sh_clear};
                 // k is index in function_ptr[] which matches position of keywords in builtin[]
                 func_ptr[k](parsed_str); // parsed_str: an array of char * decays into char **
                 command_found = 1;
