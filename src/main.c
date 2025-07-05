@@ -3,8 +3,34 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
+
 
 char *curr_dir;
+
+void sh_ls_ext(char **us_direc_inp) // "ls" "-l"
+{
+    char path[50] = "/usr/bin/"; // needs buffer to concatenate
+    char *command = us_direc_inp[0]; // "ls"
+    strcat(path, command);
+    printf("%s\n", path);
+
+    pid_t p = fork();
+
+    if (p == 0)
+    {
+        char *args[] = {path, us_direc_inp[1], NULL};
+        execvp(args[0], args);
+    }
+    else if (p > 0)
+    {
+        wait(NULL);
+    }
+    else
+    {
+        printf("Fork fail.");
+    }
+}
 
 void sh_clear()
 {
@@ -106,14 +132,15 @@ char parse(char us_inp[BUFSIZ])
 
     char *builtin[] = {"cd", "exit", "echo", "pwd", "clear"}; // builtin array of each element in it is a pointer to char
     // Each element of builtin[] is a char * — a pointer to the first character of a string.
-    char *external[] = {};
+    char *external[] = {"ls"};
     int size_builtin = sizeof(builtin) / sizeof(builtin[0]);
+    int size_external = sizeof(external) / sizeof(external[0]);
     int command_found = 0;
 
     // checking if the command is available, if yes, classify and execute
     for (int k = 0; k < size_builtin; k++)
     {
-        // print the parsed tokens
+        // parsed tokens
         for (int j = 0; j < i; j++)
         {
             // find if command exits in builtin[], returns 0 if equal
@@ -127,6 +154,28 @@ char parse(char us_inp[BUFSIZ])
                 void (*func_ptr[])(char **) = {sh_cd, sh_ex, sh_echo, sh_pwd, sh_clear};
                 // k is index in function_ptr[] which matches position of keywords in builtin[]
                 func_ptr[k](parsed_str); // parsed_str: an array of char * decays into char **
+                command_found = 1;
+            }
+        }
+    }
+
+    for (int a = 0; a < size_external; a++)
+    {
+        // parsed strings
+        for (int b = 0; b < i; b++)
+        {
+            // find if command exits in builtin[], returns 0 if equal
+            if (strcmp(parsed_str[b], external[a]) == 0)
+            {
+                printf("External Command Detected\n");
+                /*
+                Function Pointers
+                - func_ptr is an array of pointers to functions, where each function takes a char **
+                as an argument and returns void.
+                */
+                void (*func_ptr_ext[])(char **) = {sh_ls_ext};
+                // k is index in function_ptr[] which matches position of keywords in builtin[]
+                func_ptr_ext[a](parsed_str); // parsed_str: an array of char * decays into char **
                 command_found = 1;
             }
         }
